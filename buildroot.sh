@@ -11,7 +11,7 @@
 echo BUILDER_COMPONENT:   ${BUILDER_COMPONENT}
 echo BUILDER_VARIANTS:    ${BUILDER_VARIANTS}
 
-rm -fr buildroot/output* buildroot/dl
+rm -fr buildroot/output-* buildroot/dl
 ln -s /share/cache/buildroot/dl buildroot/dl
 
 for VARIANT in ${BUILDER_VARIANTS}
@@ -21,7 +21,7 @@ do
 	DEFCONFIG_RULE=${DEFCONFIG_NAME}
 
 	# output directory for the build
-	OUTPUT_DIR=xtensa_${VARIANT}-${BUILDER_BUILDROOT_ORIGIN}-${BUILDER_BUILDROOT_CONFIG}
+	OUTPUT_DIR=output-${VARIANT}-${BUILDER_BUILDROOT_ORIGIN}-${BUILDER_BUILDROOT_CONFIG}
 	
 	
 	if [[ ! "$BUILDER_BUILTIN_VARIANTS" =~ "$VARIANT" ]]; then
