@@ -1,14 +1,26 @@
 #!/bin/bash
 
-echo component ${BUILDER_COMPONENT}
-echo variant ${BUILDER_VARIANT}
-echo built-in variants ${BUILDER_BUILTIN_VARIANTS}
-echo kernel defconfig ${BUILDER_KERNEL_DEFCONFIG}
+echo BUILDER_COMPONENT:   ${BUILDER_COMPONENT}
+echo BUILDER_VARIANTS:    ${BUILDER_VARIANTS}
+
+rm -fr kernel/output*
+
 echo buildroot origin ${BUILDER_BUILDROOT_ORIGIN}
 echo buildroot config ${BUILDER_BUILDROOT_CONFIG}
 
+export VARIANT=${BUILDER_VARIANTS}	# FIXME: select variants
 
-#cd $1
-#rm -fr output
-#make O=output ARCH=xtensa CROSS_COMPILE=$BUILDER_CROSS_COMPILE KBUILD_DEFCONFIG=$BUILDER_DEFCONFIG defconfig
-##make O=output ARCH=xtensa CROSS_COMPILE=$BUILDER_CROSS_COMPILE
+export OUTPUTDIR=output-${VARIANT}
+export TOOLSDIR=/share/publish/xtensa/buildroot/${BUILDER_BUILDROOT_ORIGIN}/${BUILDER_BUILDROOT_CONFIG}/${VARIANT}/host/usr/bin
+
+export PATH=$TOOLSDIR:$PATH
+
+cd kernel
+
+echo == Preparing for default configuration ${BUILDER_KERNEL_DEFCONFIG}
+
+make O=$OUTPUT ARCH=xtensa CROSS_COMPILE=xtensa-linux- KBUILD_DEFCONFIG=${BUILDER_KERNEL_DEFCONFIG}_defconfig defconfig
+
+echo == Building kernel
+
+make O=$OUTPUT ARCH=xtensa CROSS_COMPILE=xtensa-linux-
