@@ -1,8 +1,11 @@
 #!/bin/bash
 
 echo component ${BUILDER_COMPONENT}
-echo config name ${BUILDER_CONFIG_NAME}
-echo config file ${BUILDER_CONFIG_FILE}
+echo variant ${BUILDER_VARIANT}
+echo built-in variants ${BUILDER_BUILTIN_VARIANTS}
+echo kernel defconfig ${BUILDER_KERNEL_DEFCONFIG}
+echo buildroot origin ${BUILDER_BUILDROOT_ORIGIN}
+echo buildroot config ${BUILDER_BUILDROOT_CONFIG}
 
 
 #cd $1
