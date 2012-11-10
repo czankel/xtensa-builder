@@ -65,7 +65,7 @@ do
 		# FIXME: patch VARIANT
 	fi
 	HOST_DIR=${BUILDER_BUILDROOT_HOST_DIR}/${VARIANT}
-
+	
 	echo -----------------------------------------------------------------
 	echo "BOARD:               ${BOARD}"
 	echo "VARIANT:             ${VARIANT}"
@@ -81,6 +81,10 @@ do
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
+	sed 's/BR2_HOST_DIR.*/BR2_HOST_DIR="${HOST_DIR}"/' ${OUTPUT_DIR}/.config
 	(cd buildroot && make V=1 O=${OUTPUT_DIR})
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
 	(cd buildroot && rm -f ${OUTPUT_DIR}/.config && make clean)
 done
