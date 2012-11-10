@@ -32,10 +32,11 @@
 #  List of configurations that are included in buildroot and don't need to
 #  be copied from the BUILDER_BUILDROOT_CONFIGS_DIR directory
 
-echo "NAME:            ${BUILDER_BUILDROOT_NAME}"
-echo "TARGETS:         ${BUILDER_BUILDROOT_TARGETS}"
-echo "CONFIGS_DIR:     ${BUILDER_BUILDROOT_CONFIGS_DIR}"
-echo "BUILTIN_CONFIGS: ${BUILDER_BUILDROOT_BUILTIN_CONFIGS}"
+echo -----------------------------------------------------------------
+echo "NAME:                ${BUILDER_BUILDROOT_NAME}"
+echo "TARGETS:             ${BUILDER_BUILDROOT_TARGETS}"
+echo "CONFIGS_DIR:         ${BUILDER_BUILDROOT_CONFIGS_DIR}"
+echo "BUILTIN_CONFIGS:     ${BUILDER_BUILDROOT_BUILTIN_CONFIGS}"
 
 rm -fr buildroot/output-* buildroot/dl
 ln -s /share/cache/buildroot/dl buildroot/dl
@@ -60,9 +61,7 @@ do
 
 	if [[ ! "$BUILDER_BUILDROOT_BUILTIN_CONFIGS" =~ "${TARGET}" ]]; then
 		DEFCONFIG_FILE=${CONFIG_DIR}/${DEFCONFIG_NAME}
-		DEFCONFIG_RULE=defconfig
-		cp ${DEFCONFIG_FILE} buildroot/${OUTPUT_DIR}/.defconfig
-		# FIXME: patch VARIANT
+		DEFCONFIG_RULE="BR2_DEFCONFIG=`pwd`/${DEFCONFIG_FILE} defconfig"
 	fi
 	HOST_DIR=${BUILDER_BUILDROOT_HOST_DIR}/${VARIANT}
 	
@@ -76,15 +75,26 @@ do
 	echo
 	echo "OUTPUT_DIR:          ${OUTPUT_DIR}"
 	echo "HOST_DIR:            ${HOST_DIR}"
+	echo
 
 	(cd buildroot && make V=1 O=${OUTPUT_DIR} ${DEFCONFIG_RULE})
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
-	sed 's/BR2_HOST_DIR.*/BR2_HOST_DIR="${HOST_DIR}"/' ${OUTPUT_DIR}/.config
+
+	# update hostdir
+	CONFIG_FILE="buildroot/${OUTPUT_DIR}/.config"
+	TMP=$(printf "%s\n" "$HOST_DIR" | sed 's/[][\.*^$(){}?+|/]/\\&/g')
+	sed -e "s/BR2_HOST_DIR.*/BR2_HOST_DIR=\"${TMP}\"/" -i ${CONFIG_FILE}
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
+
 	(cd buildroot && make V=1 O=${OUTPUT_DIR})
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
+
+	# delete .config, so make clean won't delete the HOST_DIR
 	(cd buildroot && rm -f ${OUTPUT_DIR}/.config && make clean)
 done
