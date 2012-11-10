@@ -41,7 +41,7 @@ echo "BUILTIN_CONFIGS:     ${BUILDER_BUILDROOT_BUILTIN_CONFIGS}"
 rm -fr buildroot/output-* buildroot/dl
 ln -s /share/cache/buildroot/dl buildroot/dl
 
-OVERLAY_DIR=builder/buildroot/overlay
+OVERLAY_DIR="`pwd`/builder/buildroot/overlay"
 CONFIG_DIR=builder/buildroot/configs/${BUILDER_BUILDROOT_CONFIGS_DIR}
 OVERLAY_BUILTIN_VARIANTS=fsf
 
@@ -64,6 +64,7 @@ do
 		DEFCONFIG_RULE="BR2_DEFCONFIG=`pwd`/${DEFCONFIG_FILE} defconfig"
 	fi
 	HOST_DIR=${BUILDER_BUILDROOT_HOST_DIR}/${VARIANT}
+
 	
 	echo -----------------------------------------------------------------
 	echo "BOARD:               ${BOARD}"
@@ -88,6 +89,12 @@ do
 	sed -e "s/BR2_HOST_DIR.*/BR2_HOST_DIR=\"${TMP}\"/" -i ${CONFIG_FILE}
 	if [ $? -ne 0 ]; then
 		exit 1
+	fi
+
+	# update overlaydir
+	if [[ ! "$OVERLAY_BUILTIN_VARIANTS" =~ "${VARIANT}" ]]; then
+		TMP=$(printf "%s\n" "$OVERLAY_DIR" | sed 's/[][\.*^$(){}?+|/]/\\&/g')
+		sed -e "s/BR2_xtensa_overlay_dir.*/BR2_xtensa_overlay_dir=\"${TMP}\"/" -i ${CONFIG_FILE}
 	fi
 
 	(cd buildroot && make V=1 O=${OUTPUT_DIR})
