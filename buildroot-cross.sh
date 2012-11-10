@@ -82,5 +82,5 @@ do
 		exit 1
 	fi
 	(cd buildroot && make V=1 O=${OUTPUT_DIR})
-	(cd buildroot && rm .config && make clean)
+	(cd buildroot && rm -f ${OUTPUT_DIR}/.config && make clean)
 done
