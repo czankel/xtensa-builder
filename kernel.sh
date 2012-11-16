@@ -1,26 +1,73 @@
 #!/bin/bash
 
-echo BUILDER_COMPONENT:   ${BUILDER_COMPONENT}
-echo BUILDER_VARIANTS:    ${BUILDER_VARIANTS}
+# Build kernel
 
-rm -fr kernel/output*
+# BUILDER_COMPONENT                 - 'kernel'
+# BUILDER_KERNEL_NAME               - Type or name of build
+# BUILDER_KERNEL_CONFIGS            - List of board and processor variants to build
+# BUILDER_KERNEL_CONFIGS_DIR        - Additional configurations
+# BUILDER_KERNEL_BUILTIN_CONFIGS    - Configurations that come with the kernel
+# BUILDER_KERNEL_BUILDROOT_HOST_DIR - Buildroot ${HOSTDIR}
 
-echo buildroot origin ${BUILDER_BUILDROOT_ORIGIN}
-echo buildroot config ${BUILDER_BUILDROOT_CONFIG}
+echo -----------------------------------------------------------------
+echo "NAME:                ${BUILDER_KERNEL_NAME}"
+echo "CONFIGS:             ${BUILDER_KERNEL_CONFIGS}"
+echo "CONFIGS_DIR          ${BUILDER_KERNEL_CONFIGS_DIR}"
+echo "BUILTIN_CONFIGS:     ${BUILDER_KERNEL_BUILTIN_CONFIGS}"
+echo "BUILDROOT_HOST_DIR:  ${BUILDER_KERNEL_BUILDROOT_HOST_DIR}"
 
-export VARIANT=${BUILDER_VARIANTS}	# FIXME: select variants
+rm -fr kernel/output-*
 
-export OUTPUTDIR=output-${VARIANT}
-export TOOLSDIR=/share/publish/xtensa/buildroot/${BUILDER_BUILDROOT_ORIGIN}/${BUILDER_BUILDROOT_CONFIG}/${VARIANT}/host/usr/bin
+CONFIG_DIR=builder/kernel/configs/${BUILDER_KERNEL_CONFIGS_DIR}
 
-export PATH=$TOOLSDIR:$PATH
+for CONFIG in ${BUILDER_KERNEL_CONFIGS}
+do
+	DEFCONFIG=${CONFIG}_defconfig
+	OUTPUT_DIR=output-${CONFIG}
 
-cd kernel
+	mkdir -p kernel/${OUTPUT_DIR}
 
-echo == Preparing for default configuration ${BUILDER_KERNEL_DEFCONFIG}
+	IS_BUILTIN=""
+	if [[ ! "${BUILDER_KERNEL_BUILTIN_CONFIGS}" =~ "${CONFIG}" ]]; then
+		cp ${BUILDER_KERNEL_CONFIGS_DIR}/${DEFCONFIG} kernel/${OUTPUT_DIR}/.config
+		if [ $? -ne 0 ]; then
+			echo ERROR.
+			exit 1
+		fi
+	else
+		cp kernel/arch/xtensa/configs/${CONFIG} kernel/${OUTPUT_DIR}/.config
+		if [ $? -ne 0 ]; then
+			echo ERROR.
+			exit 1
+		fi
+		IS_BUILTIN="[builtin]"
+	fi
 
-make O=$OUTPUT ARCH=xtensa CROSS_COMPILE=xtensa-linux- KBUILD_DEFCONFIG=${BUILDER_KERNEL_DEFCONFIG}_defconfig defconfig
+	VARIANT=`grep "CONFIG_XTENSA_VARIANT.*=y" kernel/${OUTPUT_DIR}/.config | \
+		 sed 's/CONFIG_XTENSA_VARIANT_\(.*\)=y/\1/'`
+	VARIANT=${VARIANT,,}
+        HOST_DIR=${BUILDER_KERNEL_BUILDROOT_HOST_DIR}/${VARIANT}
 
-echo == Building kernel
+	echo -----------------------------------------------------------------
+        echo "DEFCONFIG:           ${DEFCONFIG} ${IS_BUILTIN}"
+	echo "VARIANT:             ${VARIANT}"
+        echo "OUTPUT_DIR:          ${OUTPUT_DIR}"
+        echo "HOST_DIR:            ${HOST_DIR}"
 
-make O=$OUTPUT ARCH=xtensa CROSS_COMPILE=xtensa-linux-
+
+	export PATH=${HOST_DIR}/usr/bin:$PATH
+
+	(cd kernel \
+	 && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${OUTPUT_DIR} oldconfig \
+	 && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${OUTPUT_DIR})
+
+	if [ $? -ne 0 ]; then
+		echo ERROR
+		exit 1
+	fi
+
+	export PATH=$(printf "%s" "$PATH" | sed 's/[\:]*//')
+
+done
+
+echo OK.
