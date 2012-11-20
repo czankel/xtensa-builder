@@ -1,6 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Buildroot 2012.11-git-gdaf6249-dirty Configuration
+# Buildroot 2012.11-git-00692-gee3bdfd Configuration
 #
 BR2_HAVE_DOT_CONFIG=y
 # BR2_arm is not set
@@ -21,12 +21,39 @@ BR2_HAVE_DOT_CONFIG=y
 # BR2_sparc is not set
 # BR2_x86_64 is not set
 BR2_xtensa=y
-BR2_xtensa_custom=y
-# BR2_xtensa_fsf is not set
-BR2_xtensa_custom_name="dc232b"
-BR2_xtensa_core_name="dc232b"
-BR2_xtensa_overlay_dir=""
 BR2_ARCH="xtensa"
+# BR2_x86_generic is not set
+# BR2_x86_i386 is not set
+# BR2_x86_i486 is not set
+# BR2_x86_i586 is not set
+# BR2_x86_i686 is not set
+# BR2_x86_pentiumpro is not set
+# BR2_x86_pentium_mmx is not set
+# BR2_x86_pentium_m is not set
+# BR2_x86_pentium2 is not set
+# BR2_x86_pentium3 is not set
+# BR2_x86_pentium4 is not set
+# BR2_x86_prescott is not set
+# BR2_x86_nocona is not set
+# BR2_x86_core2 is not set
+# BR2_x86_atom is not set
+# BR2_x86_k6 is not set
+# BR2_x86_k6_2 is not set
+# BR2_x86_athlon is not set
+# BR2_x86_athlon_4 is not set
+# BR2_x86_opteron is not set
+# BR2_x86_opteron_sse3 is not set
+# BR2_x86_barcelona is not set
+# BR2_x86_geode is not set
+# BR2_x86_c3 is not set
+# BR2_x86_c32 is not set
+# BR2_x86_winchip_c6 is not set
+# BR2_x86_winchip2 is not set
+BR2_XTENSA_CUSTOM=y
+# BR2_xtensa_fsf is not set
+BR2_XTENSA_CUSTOM_NAME="dc232b"
+BR2_XTENSA_CORE_NAME="dc232b"
+BR2_XTENSA_OVERLAY_DIR=""
 
 #
 # Build options
@@ -48,7 +75,7 @@ BR2_BZCAT="bzcat"
 BR2_XZCAT="xzcat"
 BR2_TAR_OPTIONS=""
 BR2_DL_DIR="$(TOPDIR)/dl"
-BR2_HOST_DIR="/share/publish/xtensa/buildroot/cross/stable/fsf"
+BR2_HOST_DIR="$(BASE_DIR)/host"
 
 #
 # Mirrors and Download locations
@@ -307,14 +334,8 @@ BR2_PACKAGE_BUSYBOX_CONFIG="package/busybox/busybox-1.20.x.config"
 #
 # Development tools
 #
-
-#
-# autoconf requires an architecture supported by qemu
-#
-
-#
-# automake requires an architecture supported by qemu
-#
+# BR2_PACKAGE_AUTOCONF is not set
+# BR2_PACKAGE_AUTOMAKE is not set
 # BR2_PACKAGE_BINUTILS is not set
 
 #
@@ -833,7 +854,7 @@ BR2_PACKAGE_BUSYBOX_CONFIG="package/busybox/busybox-1.20.x.config"
 # BR2_PACKAGE_LIBNETFILTER_LOG is not set
 
 #
-# libnetfilter_queue requires a toolchain with LARGEFILE support
+# libnetfilter_queue requires a toolchain with LARGEFILE and IPv6 support
 #
 # BR2_PACKAGE_LIBNFNETLINK is not set
 # BR2_PACKAGE_LIBNL is not set
@@ -882,7 +903,6 @@ BR2_PACKAGE_BUSYBOX_CONFIG="package/busybox/busybox-1.20.x.config"
 # BR2_PACKAGE_LIBELF is not set
 # BR2_PACKAGE_LIBEVENT is not set
 # BR2_PACKAGE_LIBEV is not set
-# BR2_PACKAGE_LIBFFI is not set
 # BR2_PACKAGE_GSL is not set
 
 #
@@ -1004,7 +1024,7 @@ BR2_PACKAGE_BUSYBOX_CONFIG="package/busybox/busybox-1.20.x.config"
 #
 
 #
-# conntrack-tools requires a toolchain with IPV6, LARGEFILE and RPC support
+# conntrack-tools requires a toolchain with IPV6 and LARGEFILE support
 #
 # BR2_PACKAGE_CUPS is not set
 # BR2_PACKAGE_DHCPDUMP is not set
