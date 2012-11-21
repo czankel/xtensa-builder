@@ -34,32 +34,57 @@ echo "  CONFIGS:           ${BUILDER_BUILDROOT_CONFIGS}"
 echo "  CONFIGS_DIR:       ${BUILDER_BUILDROOT_CONFIGS_DIR}"
 echo "  BUILTIN_CONFIGS:   ${BUILDER_BUILDROOT_BUILTIN_CONFIGS}"
 echo "  HOST_DIR:          ${BUILDER_BUILDROOT_HOST_DIR}"
+echo "  DIR:               ${BUILDER_BUILDROOT_DIR}"
+echo "  DL_DIR:            ${BUILDER_BUILDROOT_DL_DIR}"   
 
-rm -fr buildroot/output-*
-rm  buildroot/dl
-ln -s /share/cache/buildroot/dl buildroot/dl
+if [ -z "${BUILDER_BUILDROOT_DIR}" ]; then
+  echo "Buildroot directory must be specified!"
+  exit 1;
+fi
 
-OVERLAY_DIR=builder/buildroot/overlay
+if [ -z "${BUILDER_BUILDROOT_DL_DIR}" ]; then
+  echo "DL directory must be specified!"
+  exit 1;
+fi
+
+rm -fr ${BUILDER_BUILDROOT_DIR}/output-*
+rm  ${BUILDER_BUILDROOT_DIR}/dl
+ln -s ${BUILDER_BUILDROOT_DL_DIR} ${BUILDER_BUILDROOT_DIR}/dl
+
+OVERLAY_DIR=`pwd`/builder/buildroot/overlay
 CONFIGS_DIR=builder/buildroot/configs/${BUILDER_BUILDROOT_CONFIGS_DIR}
 BUILDROOT_DIR=buildroot
+OVERLAY_BUILTIN_VARIANTS=fsf
 
 for CONFIG in ${BUILDER_BUILDROOT_CONFIGS}
 do
 
 	# host and output directory for the build
 	OUTPUT_DIR=output-${CONFIG}
-	mkdir buildroot/${OUTPUT_DIR}
+	mkdir ${BUILDER_BUILDROOT_DIR}/${OUTPUT_DIR}
+	if [ $? -ne 0 ]; then
+		echo "ERROR: Can't create ${BUILDER_BUILDROOT_DIR}/${OUTPUT_DIR}"
+		exit 1
+	fi
 
 	# make 'DEFCONFIG_RULE' uses 'DEFCONFIG_NAME' for built-in configs
 	DEFCONFIG_NAME=${CONFIG}_defconfig
-	DEFCONFIG_FILE=buildroot/configs/${DEFCONFIG_NAME}
+	DEFCONFIG_FILE=${BUILDER_BUILDROOT_DIR}/configs/${DEFCONFIG_NAME}
 	DEFCONFIG_RULE=${DEFCONFIG_NAME}
+	BR2_DEFCONFIG=
+	export -n BR2_DEFCONFIG
 
 	if [[ ! "$BUILDER_BUILDROOT_BUILTIN_CONFIGS" =~ "${CONFIG}" ]]; then
 		DEFCONFIG_FILE=${CONFIGS_DIR}/${DEFCONFIG_NAME}
 		DEFCONFIG_RULE=defconfig
-		cp ${DEFCONFIG_FILE} buildroot/${OUTPUT_DIR}/.defconfig
-	fi
+		cp ${DEFCONFIG_FILE} \
+			${BUILDER_BUILDROOT_DIR}/builder_defconfig
+		if [ $? -ne 0 ]; then
+			echo "ERROR: Config file ${DEFCONFIG_FILE} doesn't exist"
+			exit 1
+		fi
+		export BR2_DEFCONFIG=builder_defconfig
+	fi 
 
 	# determine processor variant
 	eval `grep "BR2_XTENSA_CORE_NAME" ${DEFCONFIG_FILE}`
@@ -74,8 +99,6 @@ do
 	HOST_DIR="<default>"
 	if [ -n "${BUILDER_BUILDROOT_HOST_DIR}" ]; then
 		HOST_DIR="${BUILDER_BUILDROOT_HOST_DIR}/${VARIANT}" 
-		sed 's/BR2_HOST_DIR.*/BR2_HOST_DIR="${HOST_DIR}"/' \
-		${OUTPUT_DIR}/.config
 	fi
 
 	echo -----------------------------------------------------------------
@@ -87,11 +110,30 @@ do
 	echo "DEFCONFIG_FILE:      ${DEFCONFIG_FILE}"
 	echo
 
-	(cd buildroot && make V=1 O=${OUTPUT_DIR} ${DEFCONFIG_RULE})
+	(cd ${BUILDER_BUILDROOT_DIR} && \
+	 make V=1 O=${OUTPUT_DIR} ${DEFCONFIG_RULE})
+
+        # update overlaydir
+        if [[ ! "$OVERLAY_BUILTIN_VARIANTS" =~ "${VARIANT}" ]]; then
+                TMP=$(printf "%s\n" "$OVERLAY_DIR" | \
+		      sed 's/[][\.*^$(){}?+|/]/\\&/g')
+                sed -e "s/\(BR2_XTENSA_OVERLAY_DIR\).*/\1=\"${TMP}\"/" \
+		    -i ${BUILDER_BUILDROOT_DIR}/${OUTPUT_DIR}/.config
+        fi
+
+	# update host dir
 	if [ $? -ne 0 ]; then echo ERROR.; exit 1 ; fi
 
-	(cd buildroot && make V=1 O=${OUTPUT_DIR})
+	if [ -n "${BUILDER_BUILDROOT_HOST_DIR}" ]; then
+		rm -fr "${BUILDER_BUILDROOT_HOST_DIR}/${VARIANT}"
+		sed 's/BR2_HOST_DIR.*/BR2_HOST_DIR="${HOST_DIR}"/' \
+		${BUILDER_BUILDROOT_DIR}/${OUTPUT_DIR}/.config
+	fi
+
+	(cd ${BUILDER_BUILDROOT_DIR} && make V=1 O=${OUTPUT_DIR})
 	if [ $? -ne 0 ]; then echo ERROR.; exit 1 ; fi
 
-	(cd buildroot && rm -f ${OUTPUT_DIR}/.config && make clean)
+	# remove .config so we don't delete the external host dir
+	(cd ${BUILDER_BUILDROOT_DIR} && \
+	 rm -f ${OUTPUT_DIR}/.config && make clean)
 done
