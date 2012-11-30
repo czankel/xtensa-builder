@@ -71,19 +71,16 @@ do
 	DEFCONFIG_NAME=${CONFIG}_defconfig
 	DEFCONFIG_FILE=${BUILDER_BUILDROOT_DIR}/configs/${DEFCONFIG_NAME}
 	DEFCONFIG_RULE=${DEFCONFIG_NAME}
-	BR2_DEFCONFIG=
-	export -n BR2_DEFCONFIG
 
 	if [[ ! "$BUILDER_BUILDROOT_BUILTIN_CONFIGS" =~ "${CONFIG}" ]]; then
 		DEFCONFIG_FILE=${CONFIGS_DIR}/${DEFCONFIG_NAME}
-		DEFCONFIG_RULE=defconfig
+		DEFCONFIG_RULE="BR2_DEFCONFIG=builder_defconfig defconfig"
 		cp ${DEFCONFIG_FILE} \
 			${BUILDER_BUILDROOT_DIR}/builder_defconfig
 		if [ $? -ne 0 ]; then
 			echo "ERROR: Config file ${DEFCONFIG_FILE} doesn't exist"
 			exit 1
 		fi
-		export BR2_DEFCONFIG=builder_defconfig
 	fi 
 
 	# determine processor variant
@@ -126,14 +123,15 @@ do
 
 	if [ -n "${BUILDER_BUILDROOT_HOST_DIR}" ]; then
 		rm -fr "${BUILDER_BUILDROOT_HOST_DIR}/${VARIANT}"
-		sed 's/BR2_HOST_DIR.*/BR2_HOST_DIR="${HOST_DIR}"/' \
-		${BUILDER_BUILDROOT_DIR}/${OUTPUT_DIR}/.config
+                TMP=$(printf "%s\n" "$HOST_DIR" | \
+		      sed 's/[][\.*^$(){}?+|/]/\\&/g')
+		sed -e "s/\(BR2_HOST_DIR\).*/\1=\"${TMP}\"/" \
+		    -i ${BUILDER_BUILDROOT_DIR}/${OUTPUT_DIR}/.config
 	fi
 
 	(cd ${BUILDER_BUILDROOT_DIR} && make V=1 O=${OUTPUT_DIR})
 	if [ $? -ne 0 ]; then echo ERROR.; exit 1 ; fi
 
 	# remove .config so we don't delete the external host dir
-	(cd ${BUILDER_BUILDROOT_DIR} && \
-	 rm -f ${OUTPUT_DIR}/.config && make clean)
+	(cd ${BUILDER_BUILDROOT_DIR} && make clean)
 done
