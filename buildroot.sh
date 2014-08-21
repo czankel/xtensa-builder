@@ -91,7 +91,7 @@ do
 	VARIANT=${BR2_XTENSA_CORE_NAME}
 	if [ -z "${VARIANT}" ]; then
 		VARIANT=`grep "BR2_xtensa_.*=y" ${DEFCONFIG_FILE} | \
-			 sed 's/BR2_xtensa_\(.*\)=y/\/'`
+			 sed 's/BR2_xtensa_\(.*\)=y/\1/'`
 		VARIANT=${VARIANT,,}
 	fi
 
