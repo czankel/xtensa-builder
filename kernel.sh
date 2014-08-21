@@ -46,7 +46,7 @@ do
 	VARIANT=`grep "CONFIG_XTENSA_VARIANT.*=y" kernel/${OUTPUT_DIR}/.config | \
 		 sed 's/CONFIG_XTENSA_VARIANT_\(.*\)=y/\1/'`
 	VARIANT=${VARIANT,,}
-        HOST_DIR=${BUILDER_KERNEL_BUILDROOT_HOST_DIR}/${VARIANT}
+        HOST_DIR="${BUILDER_KERNEL_BUILDROOT_HOST_DIR}/${VARIANT}"
 
 	echo -----------------------------------------------------------------
         echo "DEFCONFIG:           ${DEFCONFIG} ${IS_BUILTIN}"
@@ -55,7 +55,7 @@ do
         echo "HOST_DIR:            ${HOST_DIR}"
 
 
-	export PATH="${HOST_DIR}/${VARIANT}/usr/bin:$PATH"
+	export PATH=${HOST_DIR}/${VARIANT}/usr/bin:$PATH
         echo "PATH: ${PATH}"
 
 	(cd kernel \
