@@ -48,7 +48,10 @@ if [ -z "${BUILDER_BUILDROOT_DL_DIR}" ]; then
 fi
 
 rm -fr ${BUILDER_BUILDROOT_DIR}/output-*
-rm  ${BUILDER_BUILDROOT_DIR}/dl
+rm -f ${BUILDER_BUILDROOT_DIR}/dl
+
+mkdir -p ${BUILDER_BUILDROOT_DL_DIR}
+mkdir -p ${BUILDER_BUILDROOT_DIR}
 ln -s ${BUILDER_BUILDROOT_DL_DIR} ${BUILDER_BUILDROOT_DIR}/dl
 
 OVERLAY_DIR=`pwd`/builder/buildroot/overlay
