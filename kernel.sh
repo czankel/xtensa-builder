@@ -55,7 +55,7 @@ do
         echo "HOST_DIR:            ${HOST_DIR}"
 
 
-	export PATH=${HOST_DIR}/${VARIANT}/usr/bin:$PATH
+	export PATH="${HOST_DIR}/${VARIANT}/usr/bin:$PATH"
         echo "PATH: ${PATH}"
 
 	(cd kernel \
