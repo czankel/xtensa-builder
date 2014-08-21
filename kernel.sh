@@ -35,7 +35,7 @@ do
 			exit 1
 		fi
 	else
-		cp kernel/arch/xtensa/configs/${CONFIG} kernel/${OUTPUT_DIR}/.config
+		cp kernel/arch/xtensa/configs/${DEFCONFIG} kernel/${OUTPUT_DIR}/.config
 		if [ $? -ne 0 ]; then
 			echo ERROR.
 			exit 1
