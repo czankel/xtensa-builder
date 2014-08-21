@@ -55,8 +55,7 @@ do
         echo "HOST_DIR:            ${HOST_DIR}"
 
 
-	export PATH=${HOST_DIR}/${VARIANT}/usr/bin:$PATH
-        echo "PATH: ${PATH}"
+	export PATH=${HOST_DIR}/usr/bin:$PATH
 
 	(cd kernel \
 	 && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${OUTPUT_DIR} oldconfig \
