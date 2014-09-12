@@ -51,19 +51,24 @@ fi
 
 CONFIG_VARIANT=`grep CONFIG_XTENSA_VARIANT_${VARIANT^^} ${BUILDDIR}/.config`
 
-sed -e 's/\(CONFIG_XTENSA_VARIANT_.*\)=y/# \1 is not set/' \
+sed -e "s/\(CONFIG_XTENSA_VARIANT_.*\)=y/# \1 is not set/" \
     -i ${BUILDDIR}/.config
 
 IS_BUILTIN_VARIANT=""
 if [[ -z ${CONFIG_VARIANT} ]]; then
-	sed -e 's/# \(CONFIG_XTENSA_VARIANT_CUSTOM\).*/\1=y\nCONFIG_XTENSA_VARIANT_CUSTOM_NAME=\"${VARIANT}\"/' -i ${BUILDDIR}/.config
+	sed -e "s/# \(CONFIG_XTENSA_VARIANT_CUSTOM\).*/\1=y\nCONFIG_XTENSA_VARIANT_CUSTOM_NAME=\"${VARIANT}\"/" -i ${BUILDDIR}/.config
 else
-	sed -e 's/# \(CONFIG_XTENSA_VARIANT_${VARIANT^^}\).*/\1=y/' \
+	sed -e "s/# \(CONFIG_XTENSA_VARIANT_${VARIANT^^}\).*/\1=y/" \
             -i ${BUILDDIR}/.config
 	IS_BUILTIN_VARIANT="[builtin]"
 fi
 
-sed -e 's/CONFIG_XTENSA_VARIANT_NAME=.*/CONFIG_XTENSA_VARIANT_NAME=\"${VARIANT}\"/' -i ${BUILDDIR}/.config
+if [[ -z `grep CONFIG_XTENSA_VARIANT_NAME` ]]; then
+	sed -e "s/\(.*CONFIG_XTENSA_UNALIGNED_USER.*\)/CONFIG_XTENSA_VARIANT_NAME=\"${VARIANT}\"\n\1/" \
+	    -i ${BUILDDIR}/.config
+else
+	sed -e "s/CONFIG_XTENSA_VARIANT_NAME=.*/CONFIG_XTENSA_VARIANT_NAME=\"${VARIANT}\"/" -i ${BUILDDIR}/.config
+fi
 
 
 HOSTDIR="${BUILDER_KERNEL_BUILDROOT_HOST_DIR}/${VARIANT}"
@@ -80,7 +85,7 @@ echo "HOSTDIR:             ${HOSTDIR}"
 export PATH=${HOSTDIR}/usr/bin:$PATH
 
 (cd ${KERNELDIR} \
- && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR} silentoldconfig \
+ && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR} olddefconfig \
  && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR})
 
 if [ $? -ne 0 ]; then
