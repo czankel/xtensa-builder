@@ -57,9 +57,8 @@ sed -e 's/\(CONFIG_XTENSA_VARIANT_.*\)=y/# \1 is not set/' \
 IS_BUILTIN_VARIANT=""
 if [[ -z ${CONFIG_VARIANT} ]]; then
 	sed -e 's/# \(CONFIG_XTENSA_VARIANT_CUSTOM\).*/\1=y\nCONFIG_XTENSA_VARIANT_CUSTOM_NAME=\"${VARIANT}\"/' -i ${BUILDDIR}/.config
-
 else
-	sed -e 's/# \(CONFIG_XTENSA_VARIANT_${VARIANT^^}\).*/\1=y\n' \
+	sed -e 's/# \(CONFIG_XTENSA_VARIANT_${VARIANT^^}\).*/\1=y/' \
             -i ${BUILDDIR}/.config
 	IS_BUILTIN_VARIANT="[builtin]"
 fi
