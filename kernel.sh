@@ -51,22 +51,20 @@ fi
 
 CONFIG_VARIANT=`grep CONFIG_XTENSA_VARIANT_${VARIANT^^} ${BUILDDIR}/.config`
 
-# delete all CONFIG_XTENSA_VARIANT entries (including MMU for CUSTOM variant)
-sed -e "/.*CONFIG_XTENSA_VARIANT.*/d" -i ${BUILDDIR}/.config
+sed -e 's/\(CONFIG_XTENSA_VARIANT_.*\)=y/# \1 is not set/' \
+    -i ${BUILDDIR}/.config
 
 IS_BUILTIN_VARIANT=""
 if [[ -z ${CONFIG_VARIANT} ]]; then
-	# might not need the first entry anymore?
-	echo "CONFIG_XTENSA_VARIANT_CUSTOM=y" >> ${BUILDDIR}/.config
-	echo "CONFIG_XTENSA_VARIANT_CUSTOM_NAME=\"${VARIANT}\"" >> ${BUILDDIR}/.config
-	echo "CONFIG_XTENSA_VARIANT_MMU=y" >> ${BUILDDIR}/.config
+	sed -e 's/# \(CONFIG_XTENSA_VARIANT_CUSTOM\).*/\1=y\nCONFIG_XTENSA_VARIANT_CUSTOM_NAME=\"${VARIANT}\"/' -i ${BUILDDIR}/.config
+
 else
-	# might not need this entry anymore?
-	echo "CONFIG_XTENSA_VARIANT_${VARIANT^^}=y" >> ${BUILDDIR}/.config
+	sed -e 's/# \(CONFIG_XTENSA_VARIANT_${VARIANT^^}\).*/\1=y\n' \
+            -i ${BUILDDIR}/.config
 	IS_BUILTIN_VARIANT="[builtin]"
 fi
 
-echo "CONFIG_XTENSA_VARIANT_NAME=\"${VARIANT}\"" >> ${BUILDDIR}/.config
+sed -e 's/CONFIG_XTENSA_VARIANT_NAME=.*/CONFIG_XTENSA_VARIANT_NAME=\"${VARIANT}\"' -i ${BUILDDIR}/.config
 
 
 HOSTDIR="${BUILDER_KERNEL_BUILDROOT_HOST_DIR}/${VARIANT}"
