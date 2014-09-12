@@ -63,7 +63,7 @@ else
 	IS_BUILTIN_VARIANT="[builtin]"
 fi
 
-sed -e 's/CONFIG_XTENSA_VARIANT_NAME=.*/CONFIG_XTENSA_VARIANT_NAME=\"${VARIANT}\"' -i ${BUILDDIR}/.config
+sed -e 's/CONFIG_XTENSA_VARIANT_NAME=.*/CONFIG_XTENSA_VARIANT_NAME=\"${VARIANT}\"/' -i ${BUILDDIR}/.config
 
 
 HOSTDIR="${BUILDER_KERNEL_BUILDROOT_HOST_DIR}/${VARIANT}"
@@ -80,7 +80,7 @@ echo "HOSTDIR:             ${HOSTDIR}"
 export PATH=${HOSTDIR}/usr/bin:$PATH
 
 (cd ${KERNELDIR} \
- && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR} oldconfig \
+ && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR} silentoldconfig \
  && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR})
 
 if [ $? -ne 0 ]; then
