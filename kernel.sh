@@ -11,6 +11,7 @@
 echo -----------------------------------------------------------------
 echo "NAME:                ${BUILDER_KERNEL_NAME}"
 echo "TARGET:              ${BUILDER_KERNEL_TARGET}"
+echo "MAKE_CONFIG:         ${BUILDER_KERNEL_MAKE_CONFIG}"
 echo "CONFIGS_DIR          ${BUILDER_KERNEL_CONFIGS_DIR}"
 echo "BUILTIN_CONFIGS:     ${BUILDER_KERNEL_BUILTIN_CONFIGS}"
 echo "BUILDROOT_HOST_DIR:  ${BUILDER_KERNEL_BUILDROOT_HOST_DIR}"
@@ -22,10 +23,11 @@ CONFIG_DIR=builder/kernel/configs/${BUILDER_KERNEL_CONFIGS_DIR}
 TARGETARR=(${BUILDER_KERNEL_TARGET//,/ })
 PLATFORM=${TARGETARR[0]}
 VARIANT=${TARGETARR[1]}
+MAKECONF=${TARGETARR[2]}
 
 DEFCONFIG=${PLATFORM}_defconfig
 KERNELDIR=${BUILDER_WORKSPACE}/kernel
-BUILDDIR=${WORKSPACE}/output-${PLATFORM}-${VARIANT}
+BUILDDIR=${WORKSPACE}/output-${PLATFORM}-${VARIANT}-${MAKECONF}
 
 rm -fr ${BUILDDIR}
 mkdir -p ${BUILDDIR}
@@ -75,6 +77,7 @@ HOSTDIR="${BUILDER_KERNEL_BUILDROOT_HOST_DIR}/${VARIANT}"
 
 echo -----------------------------------------------------------------
 echo "DEFCONFIG:           ${DEFCONFIG} ${IS_BUILTIN_CONFIG}"
+echo "MAKECONF:            ${MAKECONF}"
 echo "PLATFORM:            ${PLATFORM}"
 echo "VARIANT:             ${VARIANT} ${IS_BUILTIN_VARIANT}"
 echo "KERNELDIR:           ${KERNELDIR}"
@@ -85,7 +88,7 @@ echo "HOSTDIR:             ${HOSTDIR}"
 export PATH=${HOSTDIR}/usr/bin:$PATH
 
 (cd ${KERNELDIR} \
- && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR} olddefconfig \
+ && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR} ${MAKECONF} \
  && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR})
 
 if [ $? -ne 0 ]; then
