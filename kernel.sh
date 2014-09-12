@@ -39,7 +39,7 @@ if [[ ! "${BUILDER_KERNEL_BUILTIN_CONFIGS}" =~ "${PLATFORM}" ]]; then
 		exit 1
 	fi
 else
-	cp ${KERNELDIR}/${DEFCONFIG} ${BUILDDIR}/.config
+	cp ${KERNELDIR}/arch/xtensa/configs/${DEFCONFIG} ${BUILDDIR}/.config
 	if [ $? -ne 0 ]; then
 		echo ERROR.
 		exit 1
