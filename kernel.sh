@@ -32,6 +32,7 @@ mkdir -p ${BUILDDIR}
 
 IS_BUILTIN=""
 if [[ ! "${BUILDER_KERNEL_BUILTIN_CONFIGS}" =~ "${PLATFORM}" ]]; then
+	echo COPY ${BUILDER_KERNEL_CONFIGS_DIR}/${DEFCONFIG} to ${BUILDDIR}/.config
 	cp ${BUILDER_KERNEL_CONFIGS_DIR}/${DEFCONFIG} \
 	   ${BUILDDIR}/.config
 	if [ $? -ne 0 ]; then
@@ -39,6 +40,7 @@ if [[ ! "${BUILDER_KERNEL_BUILTIN_CONFIGS}" =~ "${PLATFORM}" ]]; then
 		exit 1
 	fi
 else
+	echo COPY ${KERNELDIR}/arch/xtensa/configs/${DEFCONFIG} ${BUILDDIR}/.config
 	cp ${KERNELDIR}/arch/xtensa/configs/${DEFCONFIG} ${BUILDDIR}/.config
 	if [ $? -ne 0 ]; then
 		echo ERROR.
@@ -46,6 +48,23 @@ else
 	fi
 	IS_BUILTIN="[builtin]"
 fi
+
+# delete all CONFIG_XTENSA_VARIANT entries (including MMU for CUSTOM variant)
+sed -e "/.*CONFIG_XTENSA_VARIANT.*/d" ${BUILDDIR}/.config -i ${BUILDDIR}/.config
+
+if [[ ! "${BUILDER_KERNEL_BUILTIN_CONFIGS}" =~ "${PLATFORM}" ]]; then
+	# might not need the first entry anymore?
+	echo "CONFIG_XTENSA_VARIANT_CUSTOM=y" >> ${BUILDDIR}/.config
+	echo "CONFIG_XTENSA_VARIANT_CUSTOM_NAME=\"${VARIANT}\"" >> ${BUILDDIR}/.config
+	echo "CONFIG_XTENSA_VARIANT_MMU=y" >> ${BUILDDIR}/.config
+else
+	# might not need this entry anymore?
+	echo "CONFIG_XTENSA_VARIANT_${VARIANT^^}=y" >> ${BUILDDIR}/.config
+fi
+
+echo "CONFIG_XTENSA_VARIANT_NAME=\"${VARIANT}\"" >> ${BUILDDIR}/.config
+
+
 
 HOSTDIR="${BUILDER_KERNEL_BUILDROOT_HOST_DIR}/${VARIANT}"
 
