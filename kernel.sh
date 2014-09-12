@@ -62,7 +62,7 @@ export PATH=${HOSTDIR}/usr/bin:$PATH
 
 (cd ${KERNELDIR} \
  && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR} oldconfig \
- && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUIDLDIR})
+ && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR})
 
 if [ $? -ne 0 ]; then
 	echo ERROR
