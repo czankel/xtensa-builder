@@ -3,7 +3,7 @@
 # Build kernel
 
 # BUILDER_KERNEL_NAME               - Type or name of build
-# BUILDER_KERNEL_TARGET             - <platform>,<variant>
+# BUILDER_KERNEL_TARGET             - <platform>.<variant>.<make-config>
 # BUILDER_KERNEL_CONFIGS_DIR        - Directory with additional configurations
 # BUILDER_KERNEL_BUILTIN_CONFIGS    - Configurations that come with the kernel
 # BUILDER_KERNEL_BUILDROOT_HOST_DIR - Buildroot ${HOSTDIR}
@@ -20,7 +20,7 @@ echo "BUILDER_WORKSPACE:   ${BUILDER_WORKSPACE}"
 
 CONFIG_DIR=builder/kernel/configs/${BUILDER_KERNEL_CONFIGS_DIR}
 
-TARGETARR=(${BUILDER_KERNEL_TARGET//,/ })
+TARGETARR=(${BUILDER_KERNEL_TARGET//./ })
 PLATFORM=${TARGETARR[0]}
 VARIANT=${TARGETARR[1]}
 
