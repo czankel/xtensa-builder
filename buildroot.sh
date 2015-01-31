@@ -122,8 +122,6 @@ do
         fi
 
 	# update host dir
-	if [ $? -ne 0 ]; then echo ERROR.; exit 1 ; fi
-
 	if [ -n "${BUILDER_BUILDROOT_HOST_DIR}" ]; then
 		rm -fr "${BUILDER_BUILDROOT_HOST_DIR}/${VARIANT}"
                 TMP=$(printf "%s\n" "$HOST_DIR" | \
@@ -132,8 +130,12 @@ do
 		    -i ${BUILDER_BUILDROOT_DIR}/${OUTPUT_DIR}/.config
 	fi
 
+	# run build
 	(cd ${BUILDER_BUILDROOT_DIR} && make V=1 O=${OUTPUT_DIR})
-	if [ $? -ne 0 ]; then echo ERROR.; exit 1 ; fi
+	if [ $? -ne 0 ]; then
+		 echo "ERROR, build failed"
+		 exit 1
+	fi
 
 	# remove .config so we don't delete the external host dir
 	(cd ${BUILDER_BUILDROOT_DIR} && make clean)

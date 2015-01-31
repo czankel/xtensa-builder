@@ -97,7 +97,7 @@ export PATH=${HOSTDIR}/usr/bin:$PATH
  && make ARCH=xtensa CROSS_COMPILE=xtensa-linux- O=${BUILDDIR})
 
 if [ $? -ne 0 ]; then
-	echo ERROR
+	echo ERROR, build failed.
 	exit 1
 fi
 
